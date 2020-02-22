@@ -26,7 +26,7 @@ router.get("/", function(req, res, next) {
       // console.log('business_name: ' + business_name);
 
       res.render("index", {
-        title: "Cabinet DANDAKOU",
+        title: "EGC-Togo",
         content
       });
     }
