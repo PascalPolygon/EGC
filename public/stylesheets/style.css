@@ -17,7 +17,8 @@ header,
 }
 
 .top-nav-collapse {
-  background-color: #24355c;
+  /*background-color: #24355c;*/
+  background-color: #4285f4;
 }
 
 .auth-form {
