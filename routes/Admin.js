@@ -12,22 +12,22 @@ require("dotenv").config();
 
 //const imageStream = new fileStream(); // init stream for upload and download as well as create stream handle
 
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
   res.render("Admin", { title: "Sign in" });
 });
 
-router.get("/login", function(req, res, next) {
+router.get("/login", function (req, res, next) {
   res.render("login", { title: "Sign in" });
 });
 
-router.get("/register", function(req, res, next) {
+router.get("/register", function (req, res, next) {
   res.render("register", { title: "Register" });
 });
 
 //Dashboard
-router.get("/dashboard", ensureAuthenticated, function(req, res) {
+router.get("/dashboard", ensureAuthenticated, function (req, res) {
   // var business_name = '';
-  Content.find({}, function(err, result) {
+  Content.find({}, function (err, result) {
     if (err) throw new err();
     if (!result) console.log("No content found on dashboard get");
     else {
@@ -40,19 +40,27 @@ router.get("/dashboard", ensureAuthenticated, function(req, res) {
       }
 
       //Terrible fix against null error;
-      var content = JSON.parse(result[0].content);
+      // var content = JSON.parse(result[0].content);
+      if (result[0] == "Place holder") {
+        var content = result[0];
+      } else {
+        console.log(result);
+        var content = JSON.parse(result[0].content);
+        // var content = JSON.parse(result[0]);
+        // var content = "Hello World";
+      }
 
       res.render("dashboard", {
         title: "Admin dashboard",
         admin: req.user.firstName + " " + req.user.lastName,
-        content
+        content,
       });
     }
   });
 });
 
 //Register POST
-router.post("/register", function(req, res, next) {
+router.post("/register", function (req, res, next) {
   console.log(req.body);
   // res.send("hello");
 
@@ -82,12 +90,12 @@ router.post("/register", function(req, res, next) {
       firstName,
       lastName,
       email,
-      password
+      password,
     });
   } else {
     //Validation passed
     Admin.findOne({ email: email }) //making sure admin does not already exists
-      .then(function(user) {
+      .then(function (user) {
         if (user) {
           //user exists
           errors.push({ msg: "Email is already registered" });
@@ -97,31 +105,31 @@ router.post("/register", function(req, res, next) {
             firstName,
             lastName,
             email,
-            password
+            password,
           });
         } else {
           const newAdmin = new Admin({
             firstName, //shorthand for firstName: firstName
             lastName,
             email,
-            password
+            password,
           });
 
           // Hash Password
-          bcrypt.genSalt(10, function(err, salt) {
-            bcrypt.hash(newAdmin.password, salt, function(err, hash) {
+          bcrypt.genSalt(10, function (err, salt) {
+            bcrypt.hash(newAdmin.password, salt, function (err, hash) {
               if (err) throw err;
               newAdmin.password = hash;
               newAdmin
                 .save()
-                .then(function(user) {
+                .then(function (user) {
                   req.flash(
                     "success_msg",
                     "You are now registed and can log in"
                   );
                   res.redirect("/Admin/login");
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                   console.log(err);
                 });
             });
@@ -132,50 +140,51 @@ router.post("/register", function(req, res, next) {
 });
 
 // Login Handle
-router.post("/login", function(req, res, next) {
+router.post("/login", function (req, res, next) {
   console.log("authenticating...");
   passport.authenticate("local", {
     successRedirect: "/Admin/dashboard",
     failureRedirect: "/Admin/login",
-    failureFlash: true
+    failureFlash: true,
   })(req, res, next);
 });
 
 //Logout Handle
-router.get("/logout", function(req, res) {
+router.get("/logout", function (req, res) {
   req.logout();
   req.flash("success_msg", "You are logged out");
   res.redirect("/Admin/login");
 });
 
-router.post("/dashboard", function(req, res) {
+router.post("/dashboard", function (req, res) {
   var content = req.body.content;
   // var content = JSON.parse(req.body.content);
   // console.log(content.content);
 
   console.log(content);
-  //  const newContent = new Content({
-  //    title: content
-  //  });
+  // const newContent = new Content({
+  //   // title: content,
+  //   content: content,
+  // });
 
-  //  newContent
-  //    .save()
-  //    .then(function(content) {
-  //      console.log('New content in!');
-  //      console.log(content);
+  // newContent
+  //   .save()
+  //   .then(function (content) {
+  //     console.log("New content in!");
+  //     console.log(content);
   //     //  req.flash("success_msg", "You are now registed and can log in");
   //     //  res.redirect("/Admin/login");
-  //    })
-  //    .catch(function(err) {
-  //      console.log('Failure saving new conting');
-  //      console.log(err);
-  //    });
+  //   })
+  //   .catch(function (err) {
+  //     console.log("Failure saving new conting");
+  //     console.log(err);
+  //   });
   Content.updateOne(
     {},
     {
-      $set: { content: content }
+      $set: { content: content },
     },
-    function(err, content) {
+    function (err, content) {
       if (err) throw new err();
       if (!content) console.log("No content found");
       else {
@@ -187,7 +196,7 @@ router.post("/dashboard", function(req, res) {
   );
 });
 
-router.post("/coverImageUpload", multiparty, function(req, res, next) {
+router.post("/coverImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.jumboImg;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -195,7 +204,7 @@ router.post("/coverImageUpload", multiparty, function(req, res, next) {
   res.redirect("/Admin/dashboard");
 });
 
-router.post("/client1ImageUpload", multiparty, function(req, res, next) {
+router.post("/client1ImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.client1Img;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -203,7 +212,7 @@ router.post("/client1ImageUpload", multiparty, function(req, res, next) {
   res.redirect("/Admin/dashboard");
 });
 
-router.post("/client2ImageUpload", multiparty, function(req, res, next) {
+router.post("/client2ImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.client2Img;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -211,7 +220,7 @@ router.post("/client2ImageUpload", multiparty, function(req, res, next) {
   res.redirect("/Admin/dashboard");
 });
 
-router.post("/client3ImageUpload", multiparty, function(req, res, next) {
+router.post("/client3ImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.client3Img;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -219,7 +228,7 @@ router.post("/client3ImageUpload", multiparty, function(req, res, next) {
   res.redirect("/Admin/dashboard");
 });
 
-router.post("/client4ImageUpload", multiparty, function(req, res, next) {
+router.post("/client4ImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.client4Img;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -227,7 +236,7 @@ router.post("/client4ImageUpload", multiparty, function(req, res, next) {
   res.redirect("/Admin/dashboard");
 });
 
-router.post("/client5ImageUpload", multiparty, function(req, res, next) {
+router.post("/client5ImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.client5Img;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -235,7 +244,7 @@ router.post("/client5ImageUpload", multiparty, function(req, res, next) {
   res.redirect("/Admin/dashboard");
 });
 
-router.post("/client6ImageUpload", multiparty, function(req, res, next) {
+router.post("/client6ImageUpload", multiparty, function (req, res, next) {
   var imageFile = req.files.client6Img;
   var filePath = imageFile.path;
   console.log("file path: " + filePath);
@@ -245,7 +254,7 @@ router.post("/client6ImageUpload", multiparty, function(req, res, next) {
 
 //route GET/ files/:filename
 //@Desc download image from databse to be disblayed on dashboard and index
-router.get("/images/cover", function(req, res) {
+router.get("/images/cover", function (req, res) {
   console.log("Dowloadin cover image");
   fileStream.download("Cover", res);
 });
@@ -255,32 +264,32 @@ router.get("/images/cover", function(req, res) {
 //     fileStream.download('Client1', res);
 // });
 
-router.get("/images/client1", function(req, res) {
+router.get("/images/client1", function (req, res) {
   console.log("Dowloading client 1 image...");
   fileStream.download("Client1", res);
 });
 
-router.get("/images/client2", function(req, res) {
+router.get("/images/client2", function (req, res) {
   console.log("Dowloading client 2 image...");
   fileStream.download("Client2", res);
 });
 
-router.get("/images/client3", function(req, res) {
+router.get("/images/client3", function (req, res) {
   console.log("Dowloading client 3 image...");
   fileStream.download("Client3", res);
 });
 
-router.get("/images/client4", function(req, res) {
+router.get("/images/client4", function (req, res) {
   console.log("Dowloading client 4 image...");
   fileStream.download("Client4", res);
 });
 
-router.get("/images/client5", function(req, res) {
+router.get("/images/client5", function (req, res) {
   console.log("Dowloading client 5 image...");
   fileStream.download("Client5", res);
 });
 
-router.get("/images/client6", function(req, res) {
+router.get("/images/client6", function (req, res) {
   console.log("Dowloading client 6 image...");
   fileStream.download("Client6", res);
 });

@@ -5,9 +5,9 @@ const tools = require("../public/javascripts/tools");
 const Content = require("../models/Content");
 
 /* GET home page. */
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
   // res.render('index', {title: "cabinet_dandakou"});
-  Content.find({}, function(err, result) {
+  Content.find({}, function (err, result) {
     if (err) throw new err();
     if (!result) console.log("No content found on index get");
     else {
@@ -17,7 +17,13 @@ router.get("/", function(req, res, next) {
       }
 
       //Terrible fix against null error;
-      var content = JSON.parse(result[0].content);
+      // console.log(result[0]);
+      if (result[0] == "Place holder") {
+        var content = result[0];
+      } else {
+        var content = JSON.parse(result[0].content);
+      }
+
       console.log("Content found on index get: ");
       console.log(content);
       // console.log(content[0].title);
@@ -27,15 +33,15 @@ router.get("/", function(req, res, next) {
 
       res.render("index", {
         title: "EGC-Togo",
-        content
+        content,
       });
     }
   });
 
-  router.get("/book", function(req, res, next) {
+  router.get("/book", function (req, res, next) {
     console.log("Inside book route");
     res.render("book", {
-      title: "Rendez-vous"
+      title: "Rendez-vous",
     });
   });
 });

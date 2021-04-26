@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const ContentSchema = new mongoose.Schema({
   content: {
     type: String,
-    required: true
+    required: true,
   },
-
 });
 
 const Content = mongoose.model("Content", ContentSchema);
