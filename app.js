@@ -10,7 +10,7 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 
-require("dotenv").config(); //to pull environment variables from .env file
+// require("dotenv").config(); //to pull environment variables from .env file
 // Passport config
 
 
