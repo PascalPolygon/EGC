@@ -8,7 +8,7 @@ const passport = require("passport");
 const { ensureAuthenticated } = require("../config/auth");
 var multiparty = require("connect-multiparty")();
 const fileStream = require("../fileStream"); //init stream for upload and download as well as create stream handle
-require("dotenv").config();
+// require("dotenv").config();
 
 //const imageStream = new fileStream(); // init stream for upload and download as well as create stream handle
 
