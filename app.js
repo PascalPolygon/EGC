@@ -13,6 +13,7 @@ const methodOverride = require("method-override");
 // require("dotenv").config(); //to pull environment variables from .env file
 // Passport config
 
+
 var app = express();
 app.use(bodyParser.json());
 app.use(methodOverride("_method"));
