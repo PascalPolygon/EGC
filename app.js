@@ -26,6 +26,7 @@ var AdminRouter = require("./routes/Admin");
 //connect to Mongo
 // let uri = process.env.MONGODB_URI;
 let uri = process.env.MONGODB_ATLAS_URI;
+console.log(`uri: ${uri}`);
 
 console.log("Connecting to database...");
 
