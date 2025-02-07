@@ -45,9 +45,12 @@ module.exports = function (passport) {
         done(null, admin.id);
     });
 
-    passport.deserializeUser(function (id, done) {
-        Admin.findById(id, function (err, admin) {
-            done(err, admin);
-        });
+    passport.deserializeUser(async (id, done) => {
+        try {
+          const admin = await Admin.findById(id);
+          done(null, admin);
+        } catch (err) {
+          done(err, null);
+        }
     });
 }
