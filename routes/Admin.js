@@ -5,10 +5,11 @@ const Content = require("../models/Content"); // Content model
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const { ensureAuthenticated } = require("../config/auth");
-// const multiparty = require("connect-multiparty")();
-const multiparty = require('connect-multiparty');
-const multipartyMiddleware = multiparty();
+const multer = require("multer");
 const fileStream = require("../fileStream"); // Initialize stream for upload and download
+
+// Configure multer for file uploads
+const upload = multer({ dest: "uploads/" });
 
 // Render the Admin sign-in page
 router.get("/", (req, res) => {
@@ -137,48 +138,114 @@ router.post("/dashboard", async (req, res) => {
   }
 });
 
-// Image upload handlers
-// const handleImageUpload = (imageField, imageName) => {
-//   return async (req, res) => {
-//     const imageFile = req.files[imageField];
-//     const filePath = imageFile.path;
-//     console.log(`File path: ${filePath}`);
-//     await fileStream.uploadAndReplace(imageFile, imageName);
-//     res.redirect("/Admin/dashboard");
-//   };
-// };
-
 const handleImageUpload = (imageField, imageName) => {
   return async (req, res) => {
     try {
-      const imageFile = req.files[imageField];
-      if (!imageFile) {
-        throw new Error('File not uploaded');
+      const image = req.file;
+      console.log("Image uploaded:", image);
+
+      if (!image) {
+        req.flash("error_msg", "No file uploaded");
+        return res.redirect("/Admin/dashboard");
       }
-      const filePath = imageFile.path;
-      console.log(`File path: ${filePath}`);
-      await fileStream.uploadAndReplace(imageFile, imageName);
-      res.redirect("/Admin/dashboard");
+
+      // Await the full upload and replacement process
+      await fileStream.uploadAndReplace(image, imageName);
+
+      req.flash("success_msg", `${imageName} uploaded successfully`);
+      res.status(200).json({ success: true, redirect: "/Admin/dashboard" });
     } catch (err) {
       console.error(`Error uploading ${imageName}:`, err);
-      res.status(500).send('Server Error');
+      req.flash("error_msg", `Error uploading ${imageName}`);
+      res.redirect("/Admin/dashboard");
     }
   };
 };
+// Image upload routes
+router.post(
+  "/coverImageUpload",
+  ensureAuthenticated,
+  upload.single("jumboImg"),
+  handleImageUpload("jumboImg", "Cover")
+);
 
-router.post("/coverImageUpload", multipartyMiddleware, handleImageUpload("jumboImg", "Cover"));
-router.post("/client1ImageUpload", multipartyMiddleware, handleImageUpload("client1Img", "Client1"));
-router.post("/client2ImageUpload", multipartyMiddleware, handleImageUpload("client2Img", "Client2"));
-router.post("/client3ImageUpload", multipartyMiddleware, handleImageUpload("client3Img", "Client3"));
-router.post("/client4ImageUpload", multipartyMiddleware, handleImageUpload("client4Img", "Client4"));
-router.post("/client5ImageUpload", multipartyMiddleware, handleImageUpload("client5Img", "Client5"));
-router.post("/client6ImageUpload", multipartyMiddleware, handleImageUpload("client6Img", "Client6"));
+router.post(
+  "/client1ImageUpload",
+  ensureAuthenticated,
+  upload.single("client1Img"),
+  handleImageUpload("client1Img", "Client1")
+);
 
-// Route to download images
-router.get("/images/:imageName", (req, res) => {
-  const { imageName } = req.params;
-  console.log(`Downloading ${imageName} image...`);
-  fileStream.download(imageName, res);
+router.post(
+  "/client2ImageUpload",
+  ensureAuthenticated,
+  upload.single("client2Img"),
+  handleImageUpload("client2Img", "Client2")
+);
+
+router.post(
+  "/client3ImageUpload",
+  ensureAuthenticated,
+  upload.single("client3Img"),
+  handleImageUpload("client3Img", "Client3")
+);
+
+router.post(
+  "/client4ImageUpload",
+  ensureAuthenticated,
+  upload.single("client4Img"),
+  handleImageUpload("client4Img", "Client4")
+);
+
+router.post(
+  "/client5ImageUpload",
+  ensureAuthenticated,
+  upload.single("client5Img"),
+  handleImageUpload("client5Img", "Client5")
+);
+
+router.post(
+  "/client6ImageUpload",
+  ensureAuthenticated,
+  upload.single("client6Img"),
+  handleImageUpload("client6Img", "Client6")
+);
+
+// Image retrieval routes
+router.get("/images/cover", (req, res) => {
+  console.log("Downloading cover image...");
+  fileStream.download("Cover", res);
 });
+
+router.get("/images/client1", (req, res) => {
+  console.log("Downloading client 1 image...");
+  fileStream.download("Client1", res);
+});
+
+router.get("/images/client2", (req, res) => {
+  console.log("Downloading client 2 image...");
+  fileStream.download("Client2", res);
+});
+
+router.get("/images/client3", (req, res) => {
+  console.log("Downloading client 3 image...");
+  fileStream.download("Client3", res);
+});
+
+router.get("/images/client4", (req, res) => {
+  console.log("Downloading client 4 image...");
+  fileStream.download("Client4", res);
+});
+
+router.get("/images/client5", (req, res) => {
+  console.log("Downloading client 5 image...");
+  fileStream.download("Client5", res);
+});
+
+router.get("/images/client6", (req, res) => {
+  console.log("Downloading client 6 image...");
+  fileStream.download("Client6", res);
+});
+
 
 module.exports = router;

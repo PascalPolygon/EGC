@@ -91,11 +91,17 @@
                             </h4>
                             <!-- <button type="button" class="btn btn-outline-white">Read more<i class="fas fa-book ml-2"></i>
                                 </button> -->
-                            <form action="/Admin/coverImageUpload" method="POST" enctype="multipart/form-data">
+                            <!-- <form action="/Admin/coverImageUpload" method="POST" enctype="multipart/form-data">
                                 <input type="file" name="jumboImg" id="jumboImg" class="inputfile" accept="image/x-png,image/gif,image/jpeg" />
                                 <label for="jumboImg" id="jumboImgLabel"><i class="fas fa-upload"></i> Choose a new cover image</label><br>
                                 <button id="upload_jumboImg" type="submit" class="btn btn-outline-success hidden"></button>
-                            </form>
+                            </form> -->
+                            <!-- <form> -->
+                                <input type="file" name="jumboImg" id="jumboImg" class="inputfile" accept="image/x-png,image/gif,image/jpeg" />
+                                <label for="jumboImg" id="jumboImgLabel"><i class="fas fa-upload"></i> Choose a new cover image</label><br>
+                                <button id="uploadButton" type="button">Upload Cover Image</button>
+
+                            <!-- </form> -->
                         </div>
                     </div>
                 </div>
@@ -650,6 +656,50 @@
             <script>
                 $(".carousel ").carousel({
                     interval: 3000 //in milliseconds (set to false to to turn off autoplay)
+                });
+            </script>
+
+            <!-- Custom function to upload the selected image -->
+            <script>
+                function uploadImage(fieldName, uploadUrl) {
+                    const input = document.getElementById(fieldName);
+                    if (!input || input.files.length === 0) {
+                        alert("Please select a file to upload.");
+                        return;
+                    }
+
+                    const file = input.files[0];
+                    console.log("Uploading file:", file);
+                    const formData = new FormData();
+                    // The key ("jumboImg") must match what the server-side route expects.
+                    formData.append(fieldName, file);
+
+                    // Use fetch to send the POST request to your Admin route
+                    fetch(uploadUrl, {
+                        method: "POST",
+                        body: formData,
+                    })
+                    .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Upload failed with status " + response.status);
+                    }
+                    return response.json();  // assuming your route returns JSON
+                    })
+                    .then(data => {
+                    console.log("Upload successful:", data);
+                    window.location.href = data.redirect;
+                    })
+                    .catch(error => console.error("Error uploading image:", error));
+                }
+
+                // Option 1: Trigger upload as soon as a file is selected
+                document.getElementById("jumboImg").addEventListener("change", function() {
+                    uploadImage("jumboImg", "/Admin/coverImageUpload");
+                });
+
+                // Option 2: Or trigger upload when the user clicks a button:
+                document.getElementById("uploadButton").addEventListener("click", function() {
+                    uploadImage("jumboImg", "/Admin/coverImageUpload");
                 });
             </script>
 

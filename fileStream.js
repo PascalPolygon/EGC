@@ -14,18 +14,28 @@ conn.once("open", () => {
 module.exports.uploadAndReplace = async function (imageFile, imageType) {
   try {
     // Upload new image
-    const uploadStream = gfs.openUploadStream(imageFile.name);
+    const uploadStream = gfs.openUploadStream(imageFile.originalname); // Use `originalname` instead of `name`
     fs.createReadStream(imageFile.path).pipe(uploadStream);
 
-    uploadStream.on("finish", async (uploadedFile) => {
+    uploadStream.on("finish", async () => {
+      console.log(`Image "${imageFile.originalname}" uploaded successfully.`);
+
+      // Retrieve the newly uploaded file from GridFS
+      const files = await gfs.find({ filename: imageFile.originalname }).toArray();
+      if (!files || files.length === 0) {
+        console.error("Error: Uploaded file not found in GridFS.");
+        return;
+      }
+      const uploadedFile = files[0]; // Get the most recent upload
+
       console.log("Uploaded file ID:", uploadedFile._id);
 
       // Remove existing image record
       const imageToDelete = await Images.findOneAndDelete({ imageType });
       if (imageToDelete) {
-        console.log("Deleting image:", imageToDelete);
+        console.log("Deleting old image record:", imageToDelete);
         // Delete file from GridFS
-        await gfs.delete(imageToDelete.imageId);
+        await gfs.delete(new mongoose.Types.ObjectId(imageToDelete.imageId));
         console.log("Deleted old image from GridFS");
       }
 
