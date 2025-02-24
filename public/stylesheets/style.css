@@ -9,6 +9,7 @@ header,
   /* background: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/full%20page/img%20%283%29.jpg")
     no-repeat center center fixed; */
   background: url("/images/place-independence.jpg") no-repeat center center fixed;
+  /* background: url("../images/Batiment AGF face 1.png") no-repeat center center fixed; */
   /* background: url("../images/scale.jpg") no-repeat center center fixed; */
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -68,4 +69,34 @@ header,
 .not-active {
   pointer-events: none;
   cursor: default;
+}
+
+.rounded-xl {
+  border-radius: 1rem !important; /* Even larger than rounded-lg */
+}
+
+/* Or for even more rounded corners: */
+.rounded-xxl {
+  border-radius: 2rem !important; /* Very large border radius */
+}
+
+.view.rounded-xl {
+  overflow: hidden;
+}
+
+.mask.rounded-xl {
+  border-radius: 1rem !important;
+}
+
+/* If you want to use rounded-xxl instead: */
+.view.rounded-xxl {
+  overflow: hidden;
+}
+
+.mask.rounded-xxl {
+  border-radius: 2rem !important;
+}
+
+.view.overlay:hover .mask {
+  background-color: rgba(0, 0, 0, 0.5) !important; /* Darker overlay */
 }

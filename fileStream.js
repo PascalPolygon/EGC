@@ -11,45 +11,101 @@ conn.once("open", () => {
   gfs = new GridFSBucket(conn.db, { bucketName: "fs" });
 });
 
+// module.exports.uploadAndReplace = async function (imageFile, imageType) {
+//   try {
+//     // Upload new image
+//     const uploadStream = gfs.openUploadStream(imageFile.originalname); // Use `originalname` instead of `name`
+//     fs.createReadStream(imageFile.path).pipe(uploadStream);
+
+//     uploadStream.on("finish", async () => {
+//       console.log(`Image "${imageFile.originalname}" uploaded successfully.`);
+
+//       // Retrieve the newly uploaded file from GridFS
+//       const files = await gfs.find({ filename: imageFile.originalname }).toArray();
+//       if (!files || files.length === 0) {
+//         console.error("Error: Uploaded file not found in GridFS.");
+//         return;
+//       }
+//       const uploadedFile = files[0]; // Get the most recent upload
+
+//       console.log("Uploaded file ID:", uploadedFile._id);
+
+//       // Remove existing image record
+//       const imageToDelete = await Images.findOneAndDelete({ imageType });
+//       if (imageToDelete) {
+//         console.log("Deleting old image record:", imageToDelete);
+//         // Delete file from GridFS
+//         await gfs.delete(new mongoose.Types.ObjectId(imageToDelete.imageId));
+//         console.log("Deleted old image from GridFS");
+//       }
+
+//       // Save new image record
+//       const newImage = new Images({
+//         imageId: uploadedFile._id,
+//         imageName: uploadedFile.filename,
+//         imageType,
+//       });
+//       await newImage.save();
+//       console.log("Database updated with new image");
+//     });
+//   } catch (error) {
+//     console.error("Error in uploadAndReplace:", error);
+//   }
+// };
+
 module.exports.uploadAndReplace = async function (imageFile, imageType) {
   try {
-    // Upload new image
-    const uploadStream = gfs.openUploadStream(imageFile.originalname); // Use `originalname` instead of `name`
-    fs.createReadStream(imageFile.path).pipe(uploadStream);
+    return await new Promise((resolve, reject) => {
+      // Start the upload
+      const uploadStream = gfs.openUploadStream(imageFile.originalname); // Use originalname from multer
+      const readStream = fs.createReadStream(imageFile.path);
 
-    uploadStream.on("finish", async () => {
-      console.log(`Image "${imageFile.originalname}" uploaded successfully.`);
+      readStream.pipe(uploadStream)
+        .on("error", (err) => {
+          console.error("Error piping file:", err);
+          reject(err);
+        });
 
-      // Retrieve the newly uploaded file from GridFS
-      const files = await gfs.find({ filename: imageFile.originalname }).toArray();
-      if (!files || files.length === 0) {
-        console.error("Error: Uploaded file not found in GridFS.");
-        return;
-      }
-      const uploadedFile = files[0]; // Get the most recent upload
+      uploadStream.on("finish", async () => {
+        try {
+          console.log(`Image "${imageFile.originalname}" uploaded successfully.`);
 
-      console.log("Uploaded file ID:", uploadedFile._id);
+          // Retrieve the newly uploaded file from GridFS
+          const files = await gfs.find({ filename: imageFile.originalname }).toArray();
+          if (!files || files.length === 0) {
+            return reject(new Error("Uploaded file not found in GridFS."));
+          }
+          const uploadedFile = files[0];
+          console.log("Uploaded file ID:", uploadedFile._id);
 
-      // Remove existing image record
-      const imageToDelete = await Images.findOneAndDelete({ imageType });
-      if (imageToDelete) {
-        console.log("Deleting old image record:", imageToDelete);
-        // Delete file from GridFS
-        await gfs.delete(new mongoose.Types.ObjectId(imageToDelete.imageId));
-        console.log("Deleted old image from GridFS");
-      }
+          // Remove existing image record if one exists
+          const imageToDelete = await Images.findOneAndDelete({ imageType });
+          if (imageToDelete) {
+            console.log("Deleting old image record:", imageToDelete);
+            // Delete file from GridFS
+            await gfs.delete(new mongoose.Types.ObjectId(imageToDelete.imageId));
+            console.log("Deleted old image from GridFS");
+          }
 
-      // Save new image record
-      const newImage = new Images({
-        imageId: uploadedFile._id,
-        imageName: uploadedFile.filename,
-        imageType,
+          // Save new image record in the database
+          const newImage = new Images({
+            imageId: uploadedFile._id,
+            imageName: uploadedFile.filename,
+            imageType,
+          });
+          await newImage.save();
+          console.log("Database updated with new image");
+
+          resolve(uploadedFile);
+        } catch (err) {
+          console.error("Error in finish handler:", err);
+          reject(err);
+        }
       });
-      await newImage.save();
-      console.log("Database updated with new image");
     });
   } catch (error) {
     console.error("Error in uploadAndReplace:", error);
+    throw error;
   }
 };
 
