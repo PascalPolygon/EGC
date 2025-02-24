@@ -25,17 +25,17 @@ console.log(`uri: ${uri}`);
 
 console.log("Connecting to database...");
 
-mongoose
-  .connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(function () {
-    console.log("MongoDB connected!");
-  })
-  .catch(function (err) {
-    console.log(err);
-  });
+// mongoose
+//   .connect(uri, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(function () {
+//     console.log("MongoDB connected!");
+//   })
+//   .catch(function (err) {
+//     console.log(err);
+//   });
 
 // View engine setup
 app.set("views", path.join(__dirname, "views"));
