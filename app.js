@@ -9,7 +9,7 @@ const flash = require("connect-flash"); // for sending messages on redirect
 const session = require("express-session");
 const methodOverride = require("method-override");
 
-require("dotenv").config(); // to pull environment variables from .env file
+// require("dotenv").config(); // to pull environment variables from .env file
 
 var app = express();
 app.use(methodOverride("_method"));
