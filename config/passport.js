@@ -4,40 +4,17 @@ const bcrypt = require('bcryptjs');
 
 console.log('Inside passport.js');
 
-//Load Admin Model
-const Admin = require('../models/Admins');
+// REMOVED: Load Admin Model
+// const Admin = require('../models/Admins');
 
 module.exports = function (passport) {
     console.log('inside passport function');
+    
+    // REMOVED: Database authentication strategy
     passport.use(
         new LocalStrategy({ usernameField: 'email' }, function (email, password, done) {
-            console.log('Matching email...');
-            Admin.findOne({ email: email })
-                .then(function (admin) {
-                    if (!admin) {
-                        console.log('Email not registered');
-                        return done(null, false, { message: 'That email is not registered' });
-                    }
-                    console.log('Found email.')
-
-                    //Match password
-                    bcrypt.compare(password, admin.password, function (err, isMatch) {
-                        console.log('maching password...')
-                        if (err) throw err;
-                        if (isMatch) {
-                            console.log('Good password')
-                            return done(null, admin);
-                        } else {
-                            console.log('Password incorrect')
-                            return done(null, false, { message: 'Password incorrect' })
-
-                        }
-                    });
-
-                })
-                .catch(function (err) {
-                    console.log(err);
-                })
+            console.log('Authentication disabled - no database connection');
+            return done(null, false, { message: 'Authentication is currently disabled' });
         })
     );
 
@@ -46,11 +23,8 @@ module.exports = function (passport) {
     });
 
     passport.deserializeUser(async (id, done) => {
-        try {
-          const admin = await Admin.findById(id);
-          done(null, admin);
-        } catch (err) {
-          done(err, null);
-        }
+        // REMOVED: Database user lookup
+        console.log('User deserialization disabled - no database connection');
+        done(null, null);
     });
-}
+};

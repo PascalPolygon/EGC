@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const Admin = require("../models/Admins"); // Admin model
-const Content = require("../models/Content"); // Content model
+// const Admin = require("../models/Admins"); // REMOVED - Admin model
+// const Content = require("../models/Content"); // REMOVED - Content model
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const { ensureAuthenticated } = require("../config/auth");
 const multer = require("multer");
-const fileStream = require("../fileStream"); // Initialize stream for upload and download
+// const fileStream = require("../fileStream"); // REMOVED - Initialize stream for upload and download
 
 // Configure multer for file uploads
 const upload = multer({ dest: "uploads/" });
@@ -29,20 +29,28 @@ router.get("/register", (req, res) => {
 // Dashboard
 router.get("/dashboard", ensureAuthenticated, async (req, res) => {
   try {
-    const result = await Content.find({});
-    let content = "Place holder";
+    // REMOVED: Database query
+    // const result = await Content.find({});
+    // let content = "Place holder";
+    // if (result.length > 0 && result[0]?.content) {
+    //   content = JSON.parse(result[0].content);
+    // }
 
-    if (result.length > 0 && result[0]?.content) {
-      content = JSON.parse(result[0].content);
-    }
+    // Static content placeholder
+    const content = {
+      big_title: "EGC s.a",
+      subt_title: "Des professionnels à votre service",
+      nos_valeurs_title: "Nos Valeurs",
+      // Add other content properties as needed
+    };
 
     res.render("dashboard", {
       title: "Admin dashboard",
-      admin: `${req.user.firstName} ${req.user.lastName}`,
+      admin: req.user ? `${req.user.firstName} ${req.user.lastName}` : "Admin",
       content,
     });
   } catch (err) {
-    console.error("Error fetching content:", err);
+    console.error("Error rendering dashboard:", err);
     res.status(500).send("Server Error");
   }
 });
@@ -73,34 +81,9 @@ router.post("/register", async (req, res) => {
     });
   } else {
     try {
-      const existingUser = await Admin.findOne({ email });
-
-      if (existingUser) {
-        errors.push({ msg: "Email is already registered" });
-        res.render("register", {
-          title: "Register",
-          errors,
-          firstName,
-          lastName,
-          email,
-          password,
-        });
-      } else {
-        const newAdmin = new Admin({
-          firstName,
-          lastName,
-          email,
-          password,
-        });
-
-        // Hash Password
-        const salt = await bcrypt.genSalt(10);
-        newAdmin.password = await bcrypt.hash(password, salt);
-
-        await newAdmin.save();
-        req.flash("success_msg", "You are now registered and can log in");
-        res.redirect("/Admin/login");
-      }
+      // REMOVED: Database registration functionality
+      req.flash("error_msg", "Registration is currently disabled");
+      res.redirect("/Admin");
     } catch (err) {
       console.error("Error during registration:", err);
       res.status(500).send("Server Error");
@@ -110,18 +93,20 @@ router.post("/register", async (req, res) => {
 
 // Login Handle
 router.post("/login", (req, res, next) => {
-  passport.authenticate("local", {
-    successRedirect: "/Admin/dashboard",
-    failureRedirect: "/Admin/login",
-    failureFlash: true,
-  })(req, res, next);
+  // REMOVED: Database authentication
+  req.flash("error_msg", "Authentication is currently disabled");
+  res.redirect("/Admin");
 });
 
 // Logout Handle
 router.get("/logout", (req, res) => {
-  req.logout();
-  req.flash("success_msg", "You are logged out");
-  res.redirect("/Admin/login");
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    req.flash("success_msg", "You are logged out");
+    res.redirect("/Admin");
+  });
 });
 
 // Update dashboard content
@@ -129,9 +114,9 @@ router.post("/dashboard", async (req, res) => {
   const { content } = req.body;
 
   try {
-    await Content.updateOne({}, { $set: { content } });
-    console.log("Content was successfully updated");
-    res.json({ success: true });
+    // REMOVED: Database update functionality
+    req.flash("error_msg", "Content updates are currently disabled");
+    res.redirect("/Admin/dashboard");
   } catch (err) {
     console.error("Error updating content:", err);
     res.status(500).send("Server Error");
@@ -149,11 +134,10 @@ const handleImageUpload = (imageField, imageName) => {
         return res.redirect("/Admin/dashboard");
       }
 
-      // Await the full upload and replacement process
-      await fileStream.uploadAndReplace(image, imageName);
+      // REMOVED: File upload functionality
+      req.flash("error_msg", "Image uploads are currently disabled");
+      res.redirect("/Admin/dashboard");
 
-      req.flash("success_msg", `${imageName} uploaded successfully`);
-      res.status(200).json({ success: true, redirect: "/Admin/dashboard" });
     } catch (err) {
       console.error(`Error uploading ${imageName}:`, err);
       req.flash("error_msg", `Error uploading ${imageName}`);
@@ -214,37 +198,51 @@ router.post(
 // Image retrieval routes
 router.get("/images/cover", (req, res) => {
   console.log("Downloading cover image...");
-  fileStream.download("Cover", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 router.get("/images/client1", (req, res) => {
   console.log("Downloading client 1 image...");
-  fileStream.download("Client1", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 router.get("/images/client2", (req, res) => {
   console.log("Downloading client 2 image...");
-  fileStream.download("Client2", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 router.get("/images/client3", (req, res) => {
   console.log("Downloading client 3 image...");
-  fileStream.download("Client3", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 router.get("/images/client4", (req, res) => {
   console.log("Downloading client 4 image...");
-  fileStream.download("Client4", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 router.get("/images/client5", (req, res) => {
   console.log("Downloading client 5 image...");
-  fileStream.download("Client5", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 router.get("/images/client6", (req, res) => {
   console.log("Downloading client 6 image...");
-  fileStream.download("Client6", res);
+  // REMOVED: File download functionality
+  req.flash("error_msg", "Image downloads are currently disabled");
+  res.redirect("/Admin/dashboard");
 });
 
 
